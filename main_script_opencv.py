@@ -220,7 +220,7 @@ def people_counter():
 		cv2.putText(frame, text, (130,50),cv2.FONT_HERSHEY_SIMPLEX,2,color,3)
 
 		#cv2.imshow('feed',frame)
-		end_frame = cv2.imencode('.jpg',end_frame)[1].tobytes()
+		end_frame = cv2.imencode('.jpg',frame)[1].tobytes()
 		yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + end_frame + b'\r\n')
 
 		if cv2.waitKey(40) & 0xFF == 27:
