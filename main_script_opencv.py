@@ -63,11 +63,11 @@ def motion_detection():
 			if cv2.contourArea(contour) < 1500:
 				continue
 			cv2.rectangle(frame1, (x, y), (x+w, y+h), (0, 0, 255), 3)
-			cv2.putText(frame1, "Status: {}".format('Movement'), (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
-						1, (0, 0, 255), 3)
+			cv2.putText(frame1, "Status: {}".format('Movement'), (50, 100), cv2.FONT_HERSHEY_SIMPLEX,
+						3, (0, 0, 255), 2)
 		#cv2.drawContours(frame1, contours, -1, (0, 255, 0), 2)----for debugging purpose 
 		
-		end_frame = cv2.resize(frame1, (500,500))
+		end_frame = cv2.resize(frame1, (1100,600))
 
 		
 		frame1 = frame2
@@ -168,7 +168,7 @@ def social_distance_detector():
 		text = "social distance violations: {}".format(len(violate))
 		cv2.putText(image,text,(10, image.shape[0] - 25),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2)
 
-		end_frame = cv2.resize(image,(500,500))
+		end_frame = cv2.resize(image, (1100,600))
 		end_frame = cv2.imencode('.jpg',end_frame)[1].tobytes()
 		yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + end_frame + b'\r\n')
 
@@ -217,10 +217,11 @@ def people_counter():
 			color = (0,255,0)
 
 		text = " people in frame : {}".format(PeopleInFrame)
-		cv2.putText(frame, text, (130,50),cv2.FONT_HERSHEY_SIMPLEX,2,color,3)
+		cv2.putText(frame, text, (10,50),cv2.FONT_HERSHEY_SIMPLEX,2,color,3)
 
 		#cv2.imshow('feed',frame)
-		end_frame = cv2.imencode('.jpg',frame)[1].tobytes()
+		end_frame = cv2.resize(frame, (1100,600))
+		end_frame = cv2.imencode('.jpg',end_frame)[1].tobytes()
 		yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + end_frame + b'\r\n')
 
 		if cv2.waitKey(40) & 0xFF == 27:
