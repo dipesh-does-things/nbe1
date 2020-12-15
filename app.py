@@ -12,19 +12,32 @@ def main():
 def motion():
 	return render_template('motion_detection.html')
 
-@app.route('/socail_detection_detector.html')
+@app.route('/social_detection_detector.html')
 def social_distance():
-	return render_template('socail_detection_detector.html')
+	return render_template('social_detection_detector.html')
 
 @app.route('/crowd_counter.html')
 def crowd():
 	return render_template('crowd_counter.html')
 
-@app.route('/video_feed')
-def video_feed():
+@app.route('/motion_feed')
+def motion_feed():
 	"""Video streaming route. Put this in the src attribute of an img tag."""
 	return Response(motion_detection(),
 					mimetype='multipart/x-mixed-replace; boundary=frame')
+ 
+@app.route('/social_feed')
+def social_feed():
+	"""Video streaming route. Put this in the src attribute of an img tag."""
+	return Response(social_distance_detector(),
+					mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/crowd_feed')
+def crowd_feed():
+	"""Video streaming route. Put this in the src attribute of an img tag."""
+	return Response(people_counter(),
+					mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 if __name__ == '__main__':
 	app.run(debug=True)
