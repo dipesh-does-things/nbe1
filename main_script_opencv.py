@@ -12,7 +12,7 @@ from scipy.spatial import distance as dist
 #---------defining the thresholds----------#
 
 Conf_thres_social_distance = 0.2
-social_distance = 300 	# measured in pixels
+social_distance = 100 	# measured in pixels
 Conf_thres_crowd = 0.2
 count_thres_crowd = 8
 
@@ -39,7 +39,7 @@ def motion_detection():
 	# with respect to current project directory
 	
 	# loading the address of video we want to test 
-	test_video = video_files + 'test_video.mp4'
+	test_video = video_files + 'test2.mp4'
 	cap = cv2.VideoCapture(test_video)
 
 	# reading the 2 initial frames 
@@ -57,17 +57,23 @@ def motion_detection():
 		_,threshold = cv2.threshold(blur,20,255,cv2.THRESH_BINARY)
 		dilated = cv2.dilate(threshold, None, iterations=3)
 		contours ,_ = cv2.findContours(dilated,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-		for contour in contours:
-			(x, y, w, h) = cv2.boundingRect(contour)
 
-			if cv2.contourArea(contour) < 1500:
-				continue
-			cv2.rectangle(frame1, (x, y), (x+w, y+h), (0, 0, 255), 3)
-			cv2.putText(frame1, "Status: {}".format('Movement'), (50, 100), cv2.FONT_HERSHEY_SIMPLEX,
-						3, (0, 0, 255), 2)
+		if len(contours) < 5:	# no movement threshold setting
+			cv2.putText(frame1, "Status: {}".format('NO MOVEMENT'), (20, 30), cv2.FONT_HERSHEY_PLAIN,
+						1.5, (0, 255, 255))
+		else:
+			for contour in contours:
+				(x, y, w, h) = cv2.boundingRect(contour)
+
+				if cv2.contourArea(contour) < 500:
+					continue
+				cv2.rectangle(frame1, (x, y), (x+w, y+h), (0, 0, 255), 1)
+				cv2.putText(frame1, "Status: {}".format('MOVEMENT'), (20, 30), cv2.FONT_HERSHEY_PLAIN,
+							1.5, (0, 255, 255))
 		#cv2.drawContours(frame1, contours, -1, (0, 255, 0), 2)----for debugging purpose 
 		
-		end_frame = cv2.resize(frame1, (1100,600))
+		end_frame = cv2.resize(frame1, (1100,600))	#1100,600
+		#end_frame = frame1
 
 		
 		frame1 = frame2
@@ -98,7 +104,7 @@ def social_distance_detector():
 	net = cv2.dnn.readNetFromDarknet(yolo_cfg,yolo_weight)
 
 	#start taking video as input
-	test_video = video_files + 'pedestrians.mp4'
+	test_video = video_files + 'test_video.mp4'
 	cap = cv2.VideoCapture(test_video)
 	
 	while cap.isOpened():
@@ -166,7 +172,7 @@ def social_distance_detector():
 			cv2.rectangle(image,(bbox[0],bbox[1]),(bbox[2],bbox[3]),color,2)
 		
 		text = "social distance violations: {}".format(len(violate))
-		cv2.putText(image,text,(10, image.shape[0] - 25),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2)
+		cv2.putText(image,text,(10, image.shape[0] - 25),cv2.FONT_HERSHEY_SIMPLEX,2,(0,255,255),3)
 
 		end_frame = cv2.resize(image, (1100,600))
 		end_frame = cv2.imencode('.jpg',end_frame)[1].tobytes()
@@ -197,7 +203,7 @@ def people_counter():
 
 	while video.isOpened():
 		temp,frame = video.read()
-		blob = cv2.dnn.blobFromImage(frame,3)
+		blob = cv2.dnn.blobFromImage(frame,2)
 		net.setInput(blob)
 		detections = net.forward()
 		PeopleInFrame = 0
@@ -216,8 +222,8 @@ def people_counter():
 		else:
 			color = (0,255,0)
 
-		text = " people in frame : {}".format(PeopleInFrame)
-		cv2.putText(frame, text, (10,50),cv2.FONT_HERSHEY_SIMPLEX,2,color,3)
+		text = " PEOPLE IN FRAME : {}".format(PeopleInFrame)
+		cv2.putText(frame, text, (10, frame.shape[0] - 25),cv2.FONT_HERSHEY_SIMPLEX,2,color,3)
 
 		#cv2.imshow('feed',frame)
 		end_frame = cv2.resize(frame, (1100,600))

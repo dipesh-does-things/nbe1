@@ -1,0 +1,84 @@
+----motion detection -------
+
+@brief__
+we are detecting any  motion in the video by subtracting the previous frame 
+from the present frame and then applying the gaussian blur to 
+subtracted result and then we are doing hole filling 
+cv2.findContours gives us the list of location of coordintes of contours
+
+we take individual countour coordiante and find the are from it using function
+cv2.contourArea() and compare it with some predefined threshold value
+if it is less than some threshold value that countor coordinates are discarded 
+if it is greater then we draw a rectangle using that coordinates.
+and also print movement in the current frame if there is any type of motion 
+in the frame.
+we resize the frame to fit in our browser destroyAllWindows
+using cv2.imencode() we try to encode the frame in jpg format to send it to 
+our web application.
+
+yeild will continously send the frames to our web app instead of sending one frame
+and returning from the fucntion
+
+
+----social distance detection--------
+
+@brief__
+the social social_distance_detector fucntion tries to find the distance between 
+2 boxes by pixels between the boxes and paint the boxes red if the distance is less than 
+some threshold value.
+
+we first start by importing the deep learning model libraries.
+here yolov2 model is used.
+config is given in .cfg file and pretrained model is given in weights file.
+
+we are using yolov2 tiny as it is light weight but downside of it is that 
+accuracy of detection greatly decreases.
+we want the program to run on minimum hardware so we took the model as light as possible.
+the program is also scalable, for better detection we can use yolov3 or yolov4, which 
+of course result in more computation but will give as better detection and also 
+less amount of false positives.
+
+we have to keep in mind that model used is light weight so false positives and 
+prediction accuracy is not so much.
+
+yolo can detect 80 classes ob objects all of their name is given in coco.name file.
+
+__PROGRAM FLOW __
+we are loading the convolution neural network using cv2.dnn.readNetFromDarknet()
+and giving the .cfg {configuration} and .weight file as its argument.
+
+loading the video as to read frame from the video.
+
+we first take image or individual frame and store its dimension in img_height and img_widht
+variables.
+
+we then get the blob of image. blob will basically normalize the colors in all 3 dimension 
+and this blob will be given to network fo detection.
+net.layername will give us the name of all the layer of network.
+net.forward will return us the final detected result. it gives us numpy array containing 
+the coordiantes of each detection and confidence related to all classes it can detect corresponding to that 
+detection.
+
+we then loop through individual detection and extract the confidence and only take the coordinates
+of those detection which has class ID = 0 as we only want to detect persons.
+we extract the coordinates of humans and compare with some predefined confidence threshold.
+
+now we have to apply nun maxima supression but this result in more compuatation and so 
+we are neglecting this step.
+
+we take each individual detection and find their controids and find distacnce of these centroid with
+all the centroids and which ever pair's distance is less than some predefined value,
+we paint this box red . in this way we detect social distance.
+
+
+__crowd counter __
+
+in crowd counter we are detecting person and from that we are tryig to count number of people in frame.
+if number of people in frame is more than some predefind value it gives us the error.
+
+the logic is same but here we are using different neural net 
+
+in crowd counting the people head in background are blur so we need model which can detect that.
+here we tool caffe model. 
+operation or logic is same as socail distance detector.
+here we are detecting the people and counting them.
