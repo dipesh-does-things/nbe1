@@ -38,11 +38,11 @@ def motion_detection():
 	# read the video file-------------specify the full path or relative path 
 	# with respect to current project directory
 	
-	# loading the address of video we want to test 
+	# loading the address of video we want to test
 	test_video = video_files + 'test2.mp4'
 	cap = cv2.VideoCapture(test_video)
 
-	# reading the 2 initial frames 
+	# reading the 2 initial frames
 
 	_,frame1 = cap.read()
 	_,frame2 = cap.read()
@@ -54,13 +54,13 @@ def motion_detection():
 		diff = cv2.absdiff(frame1, frame2)
 		gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
 		blur = cv2.GaussianBlur(gray, (7,7),0)
-		_,threshold = cv2.threshold(blur,20,255,cv2.THRESH_BINARY)
-		dilated = cv2.dilate(threshold, None, iterations=3)
+		_,threshold = cv2.threshold(blur,11,255,cv2.THRESH_BINARY)
+		dilated = cv2.dilate(threshold, None, iterations=5)
 		contours ,_ = cv2.findContours(dilated,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
 		if len(contours) < 5:	# no movement threshold setting
 			cv2.putText(frame1, "Status: {}".format('NO MOVEMENT'), (20, 30), cv2.FONT_HERSHEY_PLAIN,
-						1.5, (0, 255, 255))
+						1, (0, 255, 0),1)
 		else:
 			for contour in contours:
 				(x, y, w, h) = cv2.boundingRect(contour)
@@ -69,8 +69,8 @@ def motion_detection():
 					continue
 				cv2.rectangle(frame1, (x, y), (x+w, y+h), (0, 0, 255), 1)
 				cv2.putText(frame1, "Status: {}".format('MOVEMENT'), (20, 30), cv2.FONT_HERSHEY_PLAIN,
-							1.5, (0, 255, 255))
-		#cv2.drawContours(frame1, contours, -1, (0, 255, 0), 2)----for debugging purpose 
+							1, (0, 255, 0),1)
+		#cv2.drawContours(frame1, contours, -1, (0, 255, 0), 2)----for debugging purpose
 		
 		end_frame = cv2.resize(frame1, (1100,600))	#1100,600
 		#end_frame = frame1
