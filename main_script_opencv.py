@@ -13,7 +13,7 @@ from scipy.spatial import distance as dist
 
 Conf_thres_social_distance = 0.2
 social_distance = 100 	# measured in pixels
-Conf_thres_crowd = 0.2
+Conf_thres_crowd = 0.25
 count_thres_crowd = 8
 
 #-------------------------------------------#
@@ -28,6 +28,8 @@ yolo_weight = CWD + '/models_weights/yolov2-tiny.weights'
 yolo_cfg = CWD + '/models_weights/yolov2-tiny.cfg'
 caffe_prototxt = CWD + '/models_weights/deploy.prototxt.txt'
 caffe_model = CWD + '/models_weights/model_300x300_ssd_iter_140000.caffemodel'
+yolov3_cfg = CWD + '/models_weights/yolov3.cfg'
+yolov3_weights = CWD + '/models_weights/yolov3.weights'
 #-----------------------------------------------------------------------------#
 
 
@@ -194,37 +196,45 @@ def social_distance_detector():
 # here we are doing all the calculations on CPU which reduces 
 # our accuracy as well as speed of FPS
 def people_counter():
-	PeopleInFrame = 0
-	net = cv2.dnn.readNetFromCaffe(caffe_prototxt,caffe_model)
 
-	# load the address of test video 
+	net = cv2.dnn.readNetFromDarknet(yolo_cfg,yolo_weight)
+
 	test_video = video_files + 'test_video.mp4'
-	video = cv2.VideoCapture(test_video)
+	cap = cv2.VideoCapture(test_video)
 
-	while video.isOpened():
-		temp,frame = video.read()
-		blob = cv2.dnn.blobFromImage(frame,2)
+	while cap.isOpened():
+
+		_,frame = cap.read()
+
+		img_height = frame.shape[0]
+		img_width = frame.shape[1]
+
+		
+		layernames = net.getLayerNames()
+		layernames = [layernames[i[0] - 1]   for i in net.getUnconnectedOutLayers()]
+		blob = cv2.dnn.blobFromImage(frame,1/300,swapRB=True)
 		net.setInput(blob)
-		detections = net.forward()
-		PeopleInFrame = 0
-		image_height , image_width = frame.shape[:2]
 
+		output = net.forward(layernames)
 
-		for i in range(0, detections.shape[2]):
-			confidence = detections[0,0,i,2]
+		#result = []
+		people_in_frame = 0
+		for out in output:
+			for detection in out:
+				scores = detection[5:]
+				classID = np.argmax(scores)
+				confidence = scores[classID]
 
-			if confidence > Conf_thres_crowd:
-				PeopleInFrame += 1
+				if classID == 0 and confidence > Conf_thres_crowd:
+					print('detected something')
+					people_in_frame = people_in_frame + 1
 
-
-		if PeopleInFrame > count_thres_crowd:
-			color = (0,0,255)
-		else:
-			color = (0,255,0)
-
-		text = " PEOPLE IN FRAME : {}".format(PeopleInFrame)
-		cv2.putText(frame, text, (10, frame.shape[0] - 25),cv2.FONT_HERSHEY_SIMPLEX,2,color,3)
-
+		color = (0,255,0)
+		if people_in_frame > count_thres_crowd:
+			color = (0,0,255)	
+		cv2.putText(frame,f'people in frame : {people_in_frame}',(100,50),cv2.FONT_HERSHEY_SIMPLEX,2,color,2)
+		# we ought to perform non maximum supression but we are not doing it
+		# for sake of siplicity of the program 
 		#cv2.imshow('feed',frame)
 		end_frame = cv2.resize(frame, (1100,600))
 		end_frame = cv2.imencode('.jpg',end_frame)[1].tobytes()
@@ -233,7 +243,7 @@ def people_counter():
 		if cv2.waitKey(40) & 0xFF == 27:
 			break
 	cv2.destroyAllWindows()
-	video.release()
+	cap.release()
 
 
 # for debugging purpose only
