@@ -52,6 +52,7 @@ def motion_detection():
 
 	while cap.isOpened():
 		#finding difference between 2 frame to find any contours
+		frame_height = frame1.shape[0]
 
 		diff = cv2.absdiff(frame1, frame2)
 		gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
@@ -61,17 +62,17 @@ def motion_detection():
 		contours ,_ = cv2.findContours(dilated,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
 		if len(contours) < 5:	# no movement threshold setting
-			cv2.putText(frame1, "Status: {}".format('NO MOVEMENT'), (20, 30), cv2.FONT_HERSHEY_PLAIN,
-						1, (0, 255, 0),1)
+			cv2.putText(frame1, "Status: {}".format('NO MOVEMENT'), (20, frame_height - 30), cv2.FONT_HERSHEY_SIMPLEX,
+						1, (0, 255, 255),2)
 		else:
 			for contour in contours:
 				(x, y, w, h) = cv2.boundingRect(contour)
 
 				if cv2.contourArea(contour) < 500:
 					continue
-				cv2.rectangle(frame1, (x, y), (x+w, y+h), (0, 0, 255), 1)
-				cv2.putText(frame1, "Status: {}".format('MOVEMENT'), (20, 30), cv2.FONT_HERSHEY_PLAIN,
-							1, (0, 255, 0),1)
+				cv2.rectangle(frame1, (x, y), (x+w, y+h), (0, 255, 0), 1)
+				cv2.putText(frame1, "Status: {}".format('MOVEMENT'), (20, frame_height - 30), cv2.FONT_HERSHEY_SIMPLEX,
+							1, (0, 255, 255),2)
 		#cv2.drawContours(frame1, contours, -1, (0, 255, 0), 2)----for debugging purpose
 		
 		end_frame = cv2.resize(frame1, (1100,600))	#1100,600
@@ -226,13 +227,12 @@ def people_counter():
 				confidence = scores[classID]
 
 				if classID == 0 and confidence > Conf_thres_crowd:
-					print('detected something')
 					people_in_frame = people_in_frame + 1
 
 		color = (0,255,0)
 		if people_in_frame > count_thres_crowd:
 			color = (0,0,255)	
-		cv2.putText(frame,f'people in frame : {people_in_frame}',(100,50),cv2.FONT_HERSHEY_SIMPLEX,2,color,2)
+		cv2.putText(frame,f'PEOPLE IN FRAME : {people_in_frame}',(10,img_height - 50),cv2.FONT_HERSHEY_SIMPLEX,2,color,3)
 		# we ought to perform non maximum supression but we are not doing it
 		# for sake of siplicity of the program 
 		#cv2.imshow('feed',frame)
