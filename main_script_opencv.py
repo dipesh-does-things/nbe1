@@ -14,7 +14,7 @@ from scipy.spatial import distance as dist
 Conf_thres_social_distance = 0.2
 social_distance = 100 	# measured in pixels
 Conf_thres_crowd = 0.25
-count_thres_crowd = 8
+count_thres_crowd = 11
 
 #-------------------------------------------#
 
@@ -231,7 +231,10 @@ def people_counter():
 
 		color = (0,255,0)
 		if people_in_frame > count_thres_crowd:
-			color = (0,0,255)	
+			color = (0,0,255)
+			cv2.putText(frame,f'WARNING !!',(90,img_height - 140),cv2.FONT_HERSHEY_SIMPLEX,2,color,3)
+
+
 		cv2.putText(frame,f'PEOPLE IN FRAME : {people_in_frame}',(10,img_height - 50),cv2.FONT_HERSHEY_SIMPLEX,2,color,3)
 		# we ought to perform non maximum supression but we are not doing it
 		# for sake of siplicity of the program 
